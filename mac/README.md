@@ -9,7 +9,7 @@
 这个目录里有两个脚本：
 
 - **`setup-remote-control.sh`** —— 让这台 Mac 常驻在线：网页端和手机能操作它，也能在它上面新开会话，进程掉了 30 秒内自动拉起
-- **`claude-history.sh`** —— 在这台 Mac 上把本地聊天记录列出来 / 搜 / 导出 / 拉起。它是只读的，远程会话可以替你跑它，于是你在网页端也能翻本机的记录
+- **`claude-history.sh`** —— 在这台 Mac 上把本地聊天记录列出来 / 搜 / 看 / 导出 / 拉起，顺带列出本地 routine。它不动你的记录（只有 `export` 会写文件），远程会话可以替你跑它，于是你在网页端也能翻本机的东西
 
 ## 对齐清单：什么在哪儿看得到
 
@@ -19,7 +19,7 @@
 | 过去的对话（聊天记录） | `~/.claude/projects/<项目>/<会话ID>.jsonl` | 侧边栏只列 App 自己的 | ❌ 不列 | 让远程会话跑 `claude-history.sh` |
 | 你打过的每一句 prompt | `~/.claude/history.jsonl` | CLI 里 Ctrl+R | ❌ | `claude-history.sh prompts` |
 | 云端会话 | Anthropic 云 | ✅ 侧边栏（Cloud） | ✅ 天生可见 | 本来就通 |
-| 本地 routine | prompt 在 `~/.claude/scheduled-tasks/<名字>/SKILL.md`；时间 / 目录 / 模型 / 暂停状态不在文件里 | ✅ Routines 页 | ❌ 不列 | 远程会话可以读、改 SKILL.md；其余只能在 App 里改 |
+| 本地 routine | prompt 在 `~/.claude/scheduled-tasks/<名字>/SKILL.md`；时间 / 目录 / 模型 / 暂停状态不在文件里 | ✅ Routines 页 | ❌ 不列 | `claude-history.sh routines` 列出来，远程会话可以读、改 SKILL.md；其余只能在 App 里改 |
 | 云端 routine | claude.ai 账号 | ✅ 同一个 Routines 页 | ✅ claude.ai/code/routines | 本来就通 |
 | 配置（CLAUDE.md / settings.json / MCP / skills / hooks） | `~/.claude` + 项目目录 | ✅ 和 CLI 共用 | 云端会话只吃**提交进仓库**的那份 | 想让云端行为一致，就把配置提交进仓库 |
 | 本机文件 | Mac 硬盘 | ✅ | 云端会话是一份全新克隆，看不到本机文件 | Remote Control（会话跑在你的 Mac 上） |
@@ -97,7 +97,7 @@ bash ~/claude-remote-control/mac/setup-remote-control.sh --dry-run
 - 在网页/手机上改会话名字，会写回本机 —— `claude --resume` 里看到的标题跟着变（需要 claude ≥ 2.1.221）
 - 在这个远程会话里可以用大白话支使**这台机器上的其它会话**：“看看现在还有哪些会话在跑”“跟跑迁移那个会话说一声 schema 改了” —— 靠的是跨会话消息（claude ≥ 2.1.224）。注意传过去的只有你这句话，**不含对方的对话历史**
 - 网页/手机上能用的斜杠命令是有限的一批（`/compact`、`/clear`、`/context`、`/model`、`/effort`、`/rename`、`/recap`…）。**`/resume` 只能在本机终端用**（官方原话），`/export` 也不在官方列出的"手机 / 网页可用"名单里，所以同样得在本机跑，所以翻旧对话要靠下面那节的脚本
-- 关于本地 routine：远程会话能读 `~/.claude/scheduled-tasks/<名字>/SKILL.md` 看每个 routine 的 prompt，也能直接改（下次运行生效）。**暂停、改时间、改目录、改模型仍要在桌面 App 的 Routines 页面做** —— 这些不在文件里
+- 关于本地 routine：在网页端让它跑 `bash ~/claude-remote-control/mac/claude-history.sh routines`，就能看到每个 routine 的目录名、说明和 prompt；`~/.claude/scheduled-tasks/<名字>/SKILL.md` 也可以直接改（下次运行生效）。**暂停、改时间、改目录、改模型仍要在桌面 App 的 Routines 页面做** —— 这些不在文件里
 
 ## 聊天记录（history）
 
