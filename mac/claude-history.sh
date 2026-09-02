@@ -538,8 +538,10 @@ def cmd_list():
     if UNREADABLE:
         print("  ! 有 %d 个记录文件读不了（权限或损坏），没有列进来，例如 %s"
               % (len(UNREADABLE), UNREADABLE[0]))
-    print("%s共 %d 个会话，显示 %d 个。● = 此刻正在运行；~ = 文件太大，条数是估的。%s"
+    print("%s共 %d 个会话，显示 %d 个。● = 此刻正在运行；~ = 文件太大，条数是估的；%s"
           % (DIM, len(sessions), len(shown), RESET))
+    print("%s第四列是记录里的 entrypoint 字段（cli / desktop / remote …），大致能看出是谁开的。%s"
+          % (DIM, RESET))
     print("%s看某一个: bash claude-history.sh show %s%s"
           % (DIM, shown[0]["id"][:8], RESET))
 
