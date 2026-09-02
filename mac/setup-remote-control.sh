@@ -20,6 +20,8 @@
 #   --dir <路径>              用哪个目录当会话的工作目录（默认当前目录）
 #   --name <名字>             网页端看到的会话名（默认主机名）
 #   --permission-mode <模式>  会话的权限模式（default acceptEdits plan auto dontAsk bypassPermissions manual），默认不传
+#   --spawn <模式>            从手机/网页新开会话时怎么放：same-dir（默认）/ worktree（各自一个 git worktree）/ session（只服务一个会话）
+#   --capacity <N>            最多同时服务几个会话（claude 的默认值是 32）
 #   --skip-trust-check        跳过"目录信任 / 首次确认"的检测
 #
 set -euo pipefail
@@ -39,6 +41,8 @@ MIN_VERSION="2.1.200"
 PROJECT_DIR="$PWD"
 SESSION_NAME=""
 PERMISSION_MODE=""
+SPAWN_MODE=""
+CAPACITY=""
 ACTION="install"
 DRY_RUN=0
 SKIP_TRUST_CHECK=0
@@ -46,12 +50,14 @@ IS_MAC=0
 CLAUDE_BIN=""
 PATH_ENV=""
 PLIST_CONTENT=""
+RC_HELP=""
 
 if [[ "$(uname -s)" == "Darwin" ]]; then IS_MAC=1; fi
 
 usage() {
   cat <<'USAGE'
 用法: bash setup-remote-control.sh [--dir 路径] [--name 名字] [--permission-mode 模式]
+                                   [--spawn 模式] [--capacity N]
                                    [--skip-trust-check] [--dry-run] [--status] [--uninstall]
 
 在一个你用 claude 打开过的项目目录里、在 Mac 的图形界面终端里运行。
@@ -74,6 +80,8 @@ while [[ $# -gt 0 ]]; do
     --dir)              need_arg "$1" "${2:-}"; PROJECT_DIR="$2"; shift 2 ;;
     --name)             need_arg "$1" "${2:-}"; SESSION_NAME="$2"; shift 2 ;;
     --permission-mode)  need_arg "$1" "${2:-}"; PERMISSION_MODE="$2"; shift 2 ;;
+    --spawn)            need_arg "$1" "${2:-}"; SPAWN_MODE="$2"; shift 2 ;;
+    --capacity)         need_arg "$1" "${2:-}"; CAPACITY="$2"; shift 2 ;;
     --skip-trust-check) SKIP_TRUST_CHECK=1; shift ;;
     --dry-run)          DRY_RUN=1; shift ;;
     --status)           ACTION="status"; shift ;;
@@ -87,6 +95,17 @@ case "$PERMISSION_MODE" in
   ''|default|acceptEdits|plan|auto|dontAsk|bypassPermissions|manual) ;;
   *) die "无效的 --permission-mode: $PERMISSION_MODE（可选: default acceptEdits plan auto dontAsk bypassPermissions manual）" ;;
 esac
+
+case "$SPAWN_MODE" in
+  ''|same-dir|worktree|session) ;;
+  *) die "无效的 --spawn: $SPAWN_MODE（可选: same-dir worktree session）" ;;
+esac
+
+if [[ -n "$CAPACITY" ]]; then
+  # 不用算术比较：bash 把 08 / 09 当八进制，会直接报错退出
+  [[ "$CAPACITY" =~ ^[1-9][0-9]{0,3}$ ]] || die "--capacity 要是 1..9999 的整数（别写前导 0）: $CAPACITY"
+  [[ "$SPAWN_MODE" != "session" ]] || die "--spawn session 只服务一个会话，不能同时给 --capacity"
+fi
 
 # macOS 没装 Xcode 命令行工具时 /usr/bin/python3 只是一个会弹安装框的桩，所以要真的跑一下
 have_python3() {
@@ -214,6 +233,7 @@ probe_eligibility() {
   if [[ -n "${CLAUDE_CONFIG_DIR:-}" ]]; then envargs+=(CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR"); fi
   local out
   out="$(env -i "${envargs[@]}" "$CLAUDE_BIN" remote-control --help 2>&1 || true)"
+  RC_HELP="$out"
   if [[ -z "$out" ]] || grep -qiE '^[[:space:]]*(error|✗)' <<<"$out"; then
     if (( DRY_RUN )); then
       warn "Remote Control 可用性探测未通过（dry-run 继续）: $(printf '%s' "$out" | head -n 2)"
@@ -223,6 +243,23 @@ $out"
     fi
   else
     ok "Remote Control 可用"
+  fi
+}
+
+# 只在用户明确要求时才往服务里加 --spawn / --capacity：这台机器上的 claude 不认识的话，
+# 后台服务会起不来并被 KeepAlive 反复重启，所以先在帮助里确认这个 flag 存在
+require_rc_flag() {
+  local flag="$1"
+  # 整词匹配，别让 --spawn-mode 之类的近似写法蒙混过关
+  if [[ -n "$RC_HELP" ]] && grep -qE -- "(^|[^-[:alnum:]])$flag([^-[:alnum:]]|\$)" <<<"$RC_HELP"; then
+    return 0
+  fi
+  local why="这台机器的 claude remote-control 不支持 $flag"
+  [[ -n "$RC_HELP" ]] || why="没能从 claude remote-control --help 读到任何东西，无法确认它支持 $flag"
+  if (( DRY_RUN )); then
+    warn "$why（dry-run 继续）"
+  else
+    die "$why。升级 claude（$(update_hint)）或者去掉这个参数"
   fi
 }
 
@@ -286,9 +323,21 @@ preflight() {
   fi
 
   probe_eligibility
+  [[ -z "$SPAWN_MODE" ]] || require_rc_flag "--spawn"
+  [[ -z "$CAPACITY" ]] || require_rc_flag "--capacity"
 
   [[ -d "$PROJECT_DIR" ]] || die "目录不存在: $PROJECT_DIR"
   PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+
+  if [[ "$SPAWN_MODE" == "worktree" ]]; then
+    if ! git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      if (( DRY_RUN )); then
+        warn "$PROJECT_DIR 不是 git 仓库，真实安装时会拒绝 --spawn worktree"
+      else
+        die "--spawn worktree 需要工作目录是一个 git 仓库，$PROJECT_DIR 不是。换个目录，或者去掉 --spawn"
+      fi
+    fi
+  fi
   if [[ "$PROJECT_DIR" == "$HOME" || "$PROJECT_DIR" == "/" ]]; then
     die "不能用家目录或根目录当工作目录（Claude 从不信任它们）。cd 到一个项目目录再运行，或加 --dir <路径>"
   fi
@@ -380,10 +429,18 @@ PY
 
 build_plist() {
   local name="${SESSION_NAME:-$(hostname -s 2>/dev/null || hostname)}"
-  local perm_block="" conf_block=""
+  local perm_block="" conf_block="" spawn_block="" cap_block=""
   if [[ -n "$PERMISSION_MODE" ]]; then
     perm_block="    <string>--permission-mode</string>
     <string>$(xml_escape "$PERMISSION_MODE")</string>"
+  fi
+  if [[ -n "$SPAWN_MODE" ]]; then
+    spawn_block="    <string>--spawn</string>
+    <string>$(xml_escape "$SPAWN_MODE")</string>"
+  fi
+  if [[ -n "$CAPACITY" ]]; then
+    cap_block="    <string>--capacity</string>
+    <string>$(xml_escape "$CAPACITY")</string>"
   fi
   if [[ -n "${CLAUDE_CONFIG_DIR:-}" ]]; then
     conf_block="    <key>CLAUDE_CONFIG_DIR</key>
@@ -403,6 +460,8 @@ build_plist() {
     <string>--name</string>
     <string>$(xml_escape "$name")</string>
 $perm_block
+$spawn_block
+$cap_block
   </array>
   <key>WorkingDirectory</key>
   <string>$(xml_escape "$PROJECT_DIR")</string>
@@ -432,7 +491,7 @@ $conf_block
 </plist>
 EOF
 )"
-  # 没传 --permission-mode / CLAUDE_CONFIG_DIR 时会留下空行，去掉
+  # 没传 --permission-mode / --spawn / --capacity / CLAUDE_CONFIG_DIR 时会留下空行，去掉
   PLIST_CONTENT="$(printf '%s\n' "$PLIST_CONTENT" | sed '/^[[:space:]]*$/d')"
 }
 
