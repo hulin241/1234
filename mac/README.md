@@ -87,6 +87,28 @@ bash ~/claude-remote-control/mac/setup-remote-control.sh --uninstall   # 卸载�
 | `--permission-mode <模式>` | 会话权限模式：default / acceptEdits / plan / auto / dontAsk / bypassPermissions / manual；默认不传 |
 | `--skip-trust-check` | 跳过目录信任 / 首次确认检测 |
 
+## 想要"完全不问权限"
+
+网页端和手机 App 的模式下拉框只有 **Accept edits / Plan / Auto** 三项，没有 Bypass permissions —— 这是云端会话的硬限制，[官方文档](https://code.claude.com/docs/en/permission-modes)写得很明确：云端会话不提供 bypass，而且**会话还会忽略设置文件里的 `defaultMode: "bypassPermissions"` 和 `"dontAsk"`**，仓库里提交 `.claude/settings.json` 对云端会话没有任何作用（静默忽略）。
+
+真正能做到不问权限的只有本机会话，也就是这个方案：
+
+```bash
+# 1) 先在 Mac 的终端里手动接受一次免责弹窗（后台服务没有键盘，跳过这步会一直重启）
+cd ~/code/你的项目 && claude --dangerously-skip-permissions
+#    出现警告对话框时选接受，然后 Ctrl+C 退出。接受结果会写进 ~/.claude/settings.json，只需一次
+
+# 2) 再装常驻服务
+bash ~/claude-remote-control/mac/setup-remote-control.sh --permission-mode bypassPermissions
+```
+
+两个反直觉的地方：
+
+- **下拉框仍然不会显示 Bypass permissions**。会话从不把这个模式上报给 claude.ai，所以网页端显示的是别的模式，但实际不会弹权限请求。代价是：一旦你在 App 里动了那个下拉框，就切出了 bypass，而且**没法从 App 切回来** —— 只能去 Mac 的终端里按 `Shift+Tab`，或者重跑上面的脚本。
+- **`--dangerously-skip-permissions` 拒绝以 root/sudo 运行**，脚本本身也拒绝 sudo，这两点是一致的。
+
+安全提醒：官方建议只在隔离容器 / 虚拟机里用 bypass。这里是一台常开、能读写你整个家目录、还能从手机操控的 Mac，正好是文档警告的相反情形。折中方案是 `--permission-mode auto`：由分类器在后台判断，日常几乎不打断，危险动作仍会拦。
+
 ## 注意
 
 - **是"登录后自启"，不是"开机自启"**。LaunchAgent 装在登录会话里，Mac 重启后要有人登录一次才会启动。要做到真正无人值守：系统设置 → 用户与群组 → 自动登录 选这个用户（开了 FileVault 时没有这个选项），并把 Claude App 加入登录项。
