@@ -16,7 +16,7 @@
 
 在 Mac 上跑一个常驻的 `claude remote-control` 服务。会话仍然在这台 Mac 上执行（文件、本地脚本全都可用），网页端可以随时新开会话；进程意外退出 30 秒内自动拉起；用户登录后自动启动。
 
-`setup-remote-control.sh` 把这件事压缩成一条命令。下面的内容都是讲做法 1。
+`setup-remote-control.sh` 把这件事压缩成一条命令。下面的内容都是讲做法 1。多台主机、多个账号怎么组合用，见[根目录 README](../README.md)。
 
 ## 前提
 
@@ -44,7 +44,7 @@ claude remote-control
 ## 安装
 
 ```bash
-git clone -b claude/routine-visibility-issue-ajcz8j https://github.com/hulin241/1234.git ~/claude-remote-control
+git clone https://github.com/hulin241/1234.git ~/claude-remote-control
 cd ~/刚才那个项目目录
 bash ~/claude-remote-control/mac/setup-remote-control.sh
 ```
