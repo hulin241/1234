@@ -245,11 +245,12 @@ def session_files(root):
         if not os.path.isdir(pdir):
             continue
         for name in sorted(os.listdir(pdir)):
-            # <session>.jsonl 才是当前记录；.orphaned-* / .superseded-* 是被搁置的旧版本，
-            # 官方文档说它们本来就不出现在 /resume 的列表里，这里也跳过
+            # <会话ID>.jsonl 才是当前记录。被搁置的旧版本（.orphaned-… / .superseded-…）文档说
+            # 本来就不出现在 /resume 的列表里；它们的文件名里总会多出一个点，所以直接要求
+            # "点前面是干净的一段"，将来换别的后缀也一样挡得住 —— 会话 ID 是 UUID，不含点。
             if not name.endswith(".jsonl"):
                 continue
-            if ".orphaned-" in name or ".superseded-" in name:
+            if "." in name[:-6]:
                 continue
             yield os.path.join(pdir, name)
 
