@@ -4,7 +4,7 @@
 
 网页端 claude.ai/code 只显示**云端**的东西。桌面 App 里的会话、本地 routine、还有你过去的聊天记录，都在那台 Mac 上，网页端从设计上就看不到它们 —— 不是同步坏了。
 
-官方文档说得很直白：CLI、桌面 App、网页、VS Code 扩展**各自维护各自的会话历史**，没有一份合并的历史（[desktop](https://code.claude.com/docs/en/desktop#coming-from-the-cli)：“Each maintains separate session history, but they share configuration and project memory via CLAUDE.md files.”）。跨设备天然能看到的只有两类：跑在 Anthropic 云上的会话，和你主动开了 **Remote Control** 的那个本地会话。
+官方文档说得很直白：[sessions](https://code.claude.com/docs/en/sessions) —— “The desktop app, Claude Code on the web, and the VS Code extension each maintain their own session history. This page covers the CLI.”；[desktop](https://code.claude.com/docs/en/desktop#coming-from-the-cli) 又补了一句 CLI 和桌面 App 的关系 —— “Each maintains separate session history, but they share configuration and project memory via CLAUDE.md files.” 跨设备天然能看到的只有两类：跑在 Anthropic 云上的会话，和你主动开了 **Remote Control** 的那个本地会话。
 
 这个目录里有两个脚本：
 
@@ -24,11 +24,12 @@
 | 配置（CLAUDE.md / settings.json / MCP / skills / hooks） | `~/.claude` + 项目目录 | ✅ 和 CLI 共用 | 云端会话只吃**提交进仓库**的那份 | 想让云端行为一致，就把配置提交进仓库 |
 | 本机文件 | Mac 硬盘 | ✅ | 云端会话是一份全新克隆，看不到本机文件 | Remote Control（会话跑在你的 Mac 上） |
 | 侧聊（Cmd+;、`/btw`） | 不落盘 | 关掉就没了 | ❌ | 无 |
+| 从手机派活给这台 Mac | Dispatch（Cowork 标签） | ✅ 会话带 Dispatch 徽章 | 手机 App 里发任务 | 手机和桌面 App 配对一次，不用装脚本（Pro / Max，Team、Enterprise 没有） |
 
 两点说明：
 
 - 表里"❌"的那几行不是设置问题，是产品边界。能改变的只有"怎么够到"那一列。
-- `~/.claude/projects/` 是官方为 Claude Code 记录 transcript 的位置。桌面 App / Cowork 的记录**很可能也在这里**（官方的清理规则专门为它们开了例外，见下面"保留多久"），但文档没有直说路径。你机器上到底有哪些，跑一次 `claude-history.sh list` 看 `来源` 那一列就知道。
+- `~/.claude/projects/` 是官方为 Claude Code 记录 transcript 的位置（[sessions](https://code.claude.com/docs/en/sessions)）。桌面 App / Cowork 的记录**很可能也在这里**（官方的清理规则专门为它们开了例外，见下面"保留多久"），但文档没有直说路径。想看你这台机器上的实际情况，跑 `claude-history.sh list`：第四列是每份记录里的 `entrypoint` 字段（`cli` / `desktop` / `remote` …），能大致看出是谁开的 —— 这个字段官方没公开过，版本之间可能变，只能当参考。
 
 ## 两种做法
 
@@ -91,10 +92,11 @@ bash ~/claude-remote-control/mac/setup-remote-control.sh --dry-run
 ## 装完之后
 
 - 另一台电脑打开 https://claude.ai/code ，侧边栏里出现这台 Mac 的会话（带电脑图标，在线时是绿点）
-- 手机 Claude App 里同样能看到；**Code 标签顶部还会出现这台机器的卡片**，点进去选一个目录就能在这台 Mac 上开一个新会话（官方文档只写了手机 App 这么用，网页端是不是也有这张卡片，文档没写，以你看到的为准）
+- 手机 Claude App 里同样能看到；**Code 标签顶部还会出现这台机器的卡片**，点进去选一个目录就能在这台 Mac 上开一个新会话（出处是 [What's new · Week 34](https://code.claude.com/docs/en/whats-new/2026-w34)，Remote Control 参考页没写这张卡片；文档只写了手机 App 这么用，网页端有没有以你看到的为准）
 - 你在这台 Mac 上手动开的 `claude` 会话，也会自动出现在网页端（`remoteControlAtStartup`）
-- 在网页/手机上改会话名字，会写回本机 —— `claude --resume` 里看到的标题跟着变
-- 网页/手机上能用的斜杠命令是有限的一批（`/compact`、`/clear`、`/context`、`/model`、`/effort`、`/rename`、`/recap`…）。**`/resume` 和 `/export` 只能在本机终端用**，所以翻旧对话要靠下面那节的脚本
+- 在网页/手机上改会话名字，会写回本机 —— `claude --resume` 里看到的标题跟着变（需要 claude ≥ 2.1.221）
+- 在这个远程会话里可以用大白话支使**这台机器上的其它会话**：“看看现在还有哪些会话在跑”“跟跑迁移那个会话说一声 schema 改了” —— 靠的是跨会话消息（claude ≥ 2.1.224）。注意传过去的只有你这句话，**不含对方的对话历史**
+- 网页/手机上能用的斜杠命令是有限的一批（`/compact`、`/clear`、`/context`、`/model`、`/effort`、`/rename`、`/recap`…）。**`/resume` 只能在本机终端用**（官方原话），`/export` 也不在官方列出的"手机 / 网页可用"名单里，所以同样得在本机跑，所以翻旧对话要靠下面那节的脚本
 - 关于本地 routine：远程会话能读 `~/.claude/scheduled-tasks/<名字>/SKILL.md` 看每个 routine 的 prompt，也能直接改（下次运行生效）。**暂停、改时间、改目录、改模型仍要在桌面 App 的 Routines 页面做** —— 这些不在文件里
 
 ## 聊天记录（history）
@@ -103,12 +105,13 @@ bash ~/claude-remote-control/mac/setup-remote-control.sh --dry-run
 
 | 文件 | 内容 | 保留多久 |
 |---|---|---|
-| `~/.claude/projects/<项目>/<会话ID>.jsonl` | 完整对话：每条消息、每次工具调用和结果 | 默认 **30 天**，`cleanupPeriodDays` 可改；桌面 App / Cowork 里开的会话默认**不按天数删**（要给它们上限就设 `desktopSessionCleanupPeriodDays`） |
+| `~/.claude/projects/<项目>/<会话ID>.jsonl` | 完整对话：每条消息、每次工具调用和结果 | 默认 **30 天**，`cleanupPeriodDays` 可改。桌面 App / Cowork 里开的会话默认**不按天数删** —— 但这要 claude ≥ 2.1.248，更早的版本照样按 `cleanupPeriodDays` 删；想给它们一个上限就设 `desktopSessionCleanupPeriodDays`，公司用 managed settings 设了 `cleanupPeriodDays` 时也按那个值删 |
 | `~/.claude/history.jsonl` | 你打过的每一句 prompt，带时间和项目路径 | **不自动清理**，删了才没 |
-| `~/.claude/projects/<项目>/<会话ID>/subagents/`、`tool-results/` | 子 agent 的对话、被单独存出去的大段工具输出 | 跟着主 transcript 一起过期 |
-| `~/.claude/uploads/<会话>/` | 你从手机 / 网页发进 Remote Control 会话的附件 | 同上 |
+| `~/.claude/projects/<项目>/<会话ID>/subagents/` | 子 agent 的对话 | 跟着主 transcript 一起删 |
+| `~/.claude/projects/<项目>/<会话ID>/tool-results/` | 被单独存出去的大段工具输出 | 同样按 `cleanupPeriodDays` 到期删 |
+| `~/.claude/uploads/<会话>/` | 你从手机 / 网页发进 Remote Control 会话的附件 | 同样按 `cleanupPeriodDays` 到期删 |
 
-两个坑：这些文件是**明文**，工具读过的 `.env`、命令打印出来的密钥都会原样躺在里面；另外 `.orphaned-` / `.superseded-` 结尾的是被搁置的旧版本记录，`/resume` 和本脚本都不列它们。
+两个坑：这些文件是**明文**，工具读过的 `.env`、命令打印出来的密钥都会原样躺在里面；另外文件名里带 `.orphaned-`、或者以 `.superseded-<时间戳>` 结尾的，是被搁置的旧版本记录，`/resume` 和本脚本都不列它们。
 
 ### 从这台 Mac 上翻记录
 
@@ -118,15 +121,20 @@ H=~/claude-remote-control/mac/claude-history.sh
 bash $H list                      # 所有会话，按最后活动倒序；● 表示此刻正开着
 bash $H list --dir ~/code/x       # 只看某个项目
 bash $H show <会话ID前几位>        # 打印整段对话（Markdown）
+bash $H show last --limit 20      # 只看最后 20 条 —— 在手机上翻旧对话就用这个
 bash $H show last --tools         # 最近那个会话，连工具调用一起看
 bash $H search "登录 bug"          # 全文搜所有会话
-bash $H prompts 部署               # 只搜你自己打过的 prompt
+bash $H prompts 部署               # 只搜你自己打过的 prompt（再拿它去 search 定位是哪段对话）
 bash $H export a1b2c3d4 --out ~/chat.md
-bash $H where                     # 记录在哪、占多大、还能留几天
+bash $H export all --out ~/chat-backup    # 全部导出，一份会话一个 .md
+bash $H routines                  # 桌面 App 的本地 routine：名字 + prompt + 文件路径
+bash $H where                     # 记录在哪、占多大、保留多少天
 bash $H live                      # 此刻正在跑的会话（含 App / Remote Control 开的）
 ```
 
-只读：默认不动 `~/.claude` 里的任何东西，只有 `export --out` 会写你指定的那个文件。默认还会把 `<system-reminder>` 这类工具注入的内容藏掉，想看原样加 `--raw`。
+只读你的聊天记录：不动 `~/.claude/projects` 下的任何一份 transcript。唯一会写文件的是 `export` —— 给了 `--out` 就写那个路径，没给就在当前目录写 `claude-<短ID>.md`。（`list` / `show` / `resume` / `live` 会调一次 `claude agents --json`，用来标出此刻正开着的会话。）
+
+默认还会把 `<system-reminder>` 这类工具注入的内容藏掉，想看原样加 `--raw`；工具调用和 thinking 也默认不显示，用 `--tools` / `--thinking` 打开。
 
 ### 从网页端翻记录
 
@@ -134,30 +142,37 @@ bash $H live                      # 此刻正在跑的会话（含 App / Remote 
 
 > 跑一下 `bash ~/claude-remote-control/mac/claude-history.sh search "上周那个部署脚本"`，把相关的会话 ID 告诉我
 
-输出会回到网页/手机上。这是目前把**过去**的本机对话弄到网页端看的办法 —— Remote Control 本身只同步它连着的那一个会话的内容，`/resume` 在网页和手机上不能用；就算你在本机 `/resume` 切到另一段对话，连着的设备也拿不到那段对话的历史。
+找到之后再让它 `show <会话ID> --limit 20` 看结尾那几句。想看本地 routine 就让它跑 `claude-history.sh routines`。
+
+输出会回到网页/手机上。注意 `export` 写出来的 `.md` 是落在 **Mac 上**的，手机/网页那边下载不到 —— 要么让远程会话直接把内容念出来，要么自己 scp / AirDrop / 提交进一个仓库。这是目前把**过去**的本机对话弄到网页端看的办法 —— Remote Control 本身只同步它连着的那一个会话的内容，`/resume` 在网页和手机上不能用；就算你在本机 `/resume` 切到另一段对话，连着的设备也拿不到那段对话的历史。
 
 ### 官方自带的几招
 
-- `/export [文件名]`：在本机终端里把当前对话导成可读文本（网页/手机上用不了）
+- `/export [文件名]`：在本机终端里把当前对话导成可读文本。官方只点名 `/plugin`、`/resume` 是"仅本机"，`/export` 不在"手机 / 网页可用"的名单里，所以是推断
 - Ctrl+R：搜你打过的 prompt（就是 `history.jsonl`）；Ctrl+O：看当前会话的 transcript，全屏下 `/` 还能搜
 - `/resume` 的选择器默认只显示当前 worktree 的会话，**Ctrl+A 才会列出这台机器上所有项目的** —— 很多"我的旧会话不见了"其实是这个
 - `claude -p --resume <会话ID> --output-format json`：不进交互界面读一段旧会话
-- `claude project purge <路径>`：删掉某个项目的全部本地记录（transcript + history 里对应的行），不可逆
+- `claude project purge <路径>`：删掉某个项目的全部本地状态 —— transcript、**auto memory**（Claude 给自己记的项目笔记）、tasks / debug / file-history、`history.jsonl` 里对应的行、以及 `~/.claude.json` 里这个项目的条目。会先打印一份删除清单让你确认
 
 > `.jsonl` 每行的结构是**内部实现，版本之间会变**，官方明确不建议直接解析。`claude-history.sh` 就是在解析它，所以 claude 大版本更新后如果它显示不对，先用上面这些官方命令顶一下，再来修脚本。
 
-## "拉起"：四种
+## "拉起"：五种
 
+0. **从手机直接派活（最省事，什么都不用装）** —— 手机 Claude App → Cowork 标签 → Dispatch，把任务说给它。它判断是开发活儿就在这台 Mac 的桌面 App 里开一个带 **Dispatch** 徽章的 Code 会话，干完或者需要你批准时推送通知。前提是手机和桌面 App 配对过、App 开着；Pro / Max 才有，Team / Enterprise 没有。
 1. **服务掉了自己起来** —— LaunchAgent 的 `KeepAlive`：进程退出 30 秒内重启。网络断超过约 10 分钟，`claude remote-control` 会自行退出，靠的就是它拉回来。
 2. **从手机在这台 Mac 上开个新会话** —— Claude App → Code 标签顶部的机器卡片 → 选目录 → 新会话。想让这些会话各自待在自己的 git worktree 里、不互相踩，装的时候加 `--spawn worktree`。
-3. **把停掉的 Remote Control 会话拉回来** —— Ctrl+C 停掉 server 之后**约 4 小时内**，在同一个目录里：`claude remote-control`（全部拉回）、`claude remote-control --continue`（只拉它最初那个）、`claude remote-control --session-id <ID>`（ID 就是 claude.ai/code 链接里 `/code/` 后面那段）。
+3. **把停掉的 Remote Control 会话拉回来（只适用于手动跑 server 的情况）** —— 装了本目录这个常驻服务的话，进程一退 `KeepAlive` 30 秒内又拉起来了，没有"停掉"这回事；真要手动接管，先 `--uninstall` 停掉常驻服务。手动跑的 server 被 Ctrl+C 之后**约 4 小时内**，在同一个目录里：`claude remote-control`（全部拉回）、`claude remote-control --continue`（只拉它最初那个）、`claude remote-control --session-id <ID>`（ID 是 claude.ai/code 链接里 `/code/` 和 `?` 之间那段）。前提是这期间没在同一个目录里另起一个 `claude remote-control`。
 4. **把一段旧对话接着聊** ——
    ```bash
    bash $H resume <会话ID前几位>     # 打印下面这几条命令，填好目录和完整 ID
    cd <那个目录> && claude --resume <会话ID>            # 在 Mac 的终端里接着聊
    cd <那个目录> && claude --bg --resume <会话ID> "继续" # 从远程会话里后台拉起，再用 claude logs <短id> 看输出
    ```
-   想让这段旧对话**出现在网页端**：先在本机 `claude --resume` 打开它，然后在里面执行 `/remote-control` —— 它会带着当前这段对话的历史一起过去。这是官方文档给出的唯一办法。
+   想让这段旧对话**出现在网页端**，有三条路：
+   - 终端里：先 `claude --resume` 打开它，再执行 `/remote-control` —— 它会带着当前这段对话的历史一起过去
+   - 如果这段对话以前开过 Remote Control：`claude --resume` 会照它的 reconnection record 自动接回原来那个 claude.ai 会话，不用再做什么
+   - 如果它是桌面 App 里的会话：会话工具栏右下角 **Continue in → Claude Code on the Web** —— 推分支、带上对话摘要，在**云端**另开一个会话（要求工作区干净，SSH 会话不行）。之后 Mac 关机也照跑，网页天生列得到
+
    注意别同时在两个终端 resume 同一个会话：两边的消息会交织进同一份 transcript。
 
 反方向（云端会话拉到本机）用 `claude --teleport <会话ID>`，要求工作区干净、仓库对得上、分支已推、同一个账号。
@@ -181,13 +196,13 @@ bash ~/claude-remote-control/mac/claude-history.sh where               # 聊天�
 | `--dir <路径>` | 指定工作目录（默认当前目录） |
 | `--name <名字>` | 网页端看到的会话名（默认主机名） |
 | `--permission-mode <模式>` | 会话权限模式：default / acceptEdits / plan / auto / dontAsk / bypassPermissions / manual；默认不传 |
-| `--spawn <模式>` | 从设备新开的会话怎么放：`same-dir`（claude 的默认）/ `worktree`（各自一个 git worktree）/ `session`（只服务一个会话） |
+| `--spawn <模式>` | 从设备新开的会话怎么放：`same-dir`（claude 的默认）/ `worktree`（各自一个 git worktree，要求工作目录是 git 仓库）/ `session`（只服务一个会话） |
 | `--capacity <N>` | 最多同时服务几个会话（claude 的默认值是 32；和 `--spawn session` 互斥） |
 | `--skip-trust-check` | 跳过目录信任 / 首次确认检测 |
 
 `--spawn` 和 `--capacity` 会先在这台机器的 `claude remote-control --help` 里确认存在才写进服务 —— 旧版本不认识的 flag 会让后台服务起不来并被反复重启。
 
-`claude-history.sh`：`--dir` `--limit` `--out` `--tools` `--thinking` `--raw` `--json`，`bash claude-history.sh --help` 有完整说明。
+`claude-history.sh`：`--dir` `--limit` `--out` `--tools` `--thinking` `--raw` `--json`，`bash claude-history.sh --help` 有完整说明。`--limit` 对 `list` / `search` / `prompts` 是"显示几条"，对 `show` / `export` 是"只看最后几条"。
 
 ## 注意
 
@@ -212,6 +227,7 @@ bash ~/claude-remote-control/mac/setup-remote-control.sh --uninstall
 ## 参考
 
 - [Remote Control](https://code.claude.com/docs/en/remote-control)
+- [会话：resume / 转录存在哪](https://code.claude.com/docs/en/sessions)
 - [.claude 目录里都有什么](https://code.claude.com/docs/en/claude-directory)（transcript 路径、保留规则）
 - [数据用途与保留](https://code.claude.com/docs/en/data-usage)
 - [桌面 App](https://code.claude.com/docs/en/desktop)

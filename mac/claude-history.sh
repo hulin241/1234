@@ -8,7 +8,8 @@
 # routine 跑出来的）只存在这台机器的硬盘上，网页端不会列出来。这个脚本就是在这台机器
 # 上（自己在终端里跑，或者让远程会话替你跑）把它们读出来。
 #
-# 只读：默认不改 ~/.claude 里的任何东西，只有 export --out 会写你指定的文件。
+# 只读你的聊天记录：不动 ~/.claude/projects 下的任何一份 transcript。会写文件的只有 export（--out 指定路径，不给就写当前目录
+# 的 claude-<短ID>.md）；list / show / resume / live 会调一次 claude agents --json 标出在跑的会话。
 #
 # 用法：
 #   bash claude-history.sh list                    # 列最近的会话
@@ -26,11 +27,13 @@ CONF_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 PROJECTS_DIR="$CONF_DIR/projects"
 SETTINGS="$CONF_DIR/settings.json"
 PROMPT_HISTORY="$CONF_DIR/history.jsonl"
+TASKS_DIR="$CONF_DIR/scheduled-tasks"
 
 MODE=""
 TARGET=""
 FILTER_DIR=""
 LIMIT="30"
+LIMIT_SET="0"
 OUT_FILE=""
 SHOW_TOOLS="0"
 SHOW_THINKING="0"
@@ -45,15 +48,17 @@ usage() {
   list                      列出本机所有会话（按最后活动时间倒序）
   show <ID|last>            打印一次完整对话（Markdown）
   search <关键词>            在所有会话的正文里搜关键词
-  export <ID|last> --out F  把一次对话写成 Markdown 文件
+  export <ID|last> --out F  把一次对话写成 Markdown 文件；写 all 就是全部导出到 --out 那个目录
   resume <ID|last>          打印「接着聊」/「后台拉起」要敲的命令
   prompts [关键词]           列出你打过的每一句 prompt（history.jsonl，不受 30 天清理影响）
+  routines                  列出桌面 App 的本地 routine（~/.claude/scheduled-tasks/*/SKILL.md）
   live                      列出此刻正在运行的会话（含 App / Remote Control 开的）
   where                     记录存在哪个目录、占多大、本地保留多少天
 
 参数:
   --dir <路径>    只看这个项目目录下的会话（list / search）
-  --limit <N>     最多显示几条（list 默认 30，search 默认 30；给 0 表示不限）
+  --limit <N>     最多显示几条（list / search / prompts 默认 30，0 表示不限）；
+                  给 show / export 时表示只看最后 N 条消息
   --out <文件>    export 的输出路径
   --tools         show/export/search 时也带上工具调用
   --thinking      show/export 时也带上 thinking 块
@@ -76,7 +81,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)   usage; exit 0 ;;
     --dir)       need_arg "$1" "${2:-}"; FILTER_DIR="$2"; shift 2 ;;
-    --limit)     need_arg "$1" "${2:-}"; LIMIT="$2"; shift 2 ;;
+    --limit)     need_arg "$1" "${2:-}"; LIMIT="$2"; LIMIT_SET=1; shift 2 ;;
     --out)       need_arg "$1" "${2:-}"; OUT_FILE="$2"; shift 2 ;;
     --tools)     SHOW_TOOLS=1; shift ;;
     --thinking)  SHOW_THINKING=1; shift ;;
@@ -95,13 +100,13 @@ done
 
 case "$MODE" in
   ""|help) usage; exit 0 ;;
-  list|show|search|export|resume|where|live|prompts) ;;
+  list|show|search|export|resume|where|live|prompts|routines) ;;
   *) usage >&2; die "未知命令: $MODE" ;;
 esac
 
 have_python3 || die "缺少可用的 python3（macOS 上先运行: xcode-select --install）"
 
-if [[ ! -d "$PROJECTS_DIR" && "$MODE" != "live" && "$MODE" != "prompts" ]]; then
+if [[ ! -d "$PROJECTS_DIR" && "$MODE" != "live" && "$MODE" != "prompts" && "$MODE" != "routines" ]]; then
   die "找不到 $PROJECTS_DIR —— 这台机器上还没有本地会话记录（或者设了 CLAUDE_CONFIG_DIR 指向别处）"
 fi
 
@@ -120,7 +125,7 @@ live_json() {
 }
 
 LIVE=""
-if [[ "$MODE" == "live" || "$MODE" == "list" ]]; then
+if [[ "$MODE" == "live" || "$MODE" == "list" || "$MODE" == "show" || "$MODE" == "resume" ]]; then
   LIVE="$(live_json || true)"
   if [[ "$MODE" == "live" && -z "$LIVE" ]]; then
     die "读不到正在运行的会话（claude 命令不在 PATH 里，或者这台机器上没有 claude CLI）"
@@ -129,18 +134,19 @@ fi
 
 python3 - "$MODE" "$PROJECTS_DIR" "$TARGET" "$FILTER_DIR" "$LIMIT" "$OUT_FILE" \
             "$SHOW_TOOLS" "$SHOW_THINKING" "$SHOW_RAW" "$WANT_JSON" "$SETTINGS" \
-            "$PROMPT_HISTORY" "$LIVE" <<'PY'
-import calendar, json, os, signal, sys, time
+            "$PROMPT_HISTORY" "$TASKS_DIR" "$LIMIT_SET" "$LIVE" <<'PY'
+import calendar, json, os, shlex, signal, sys, time
 
 (mode, projects_dir, target, filter_dir, limit_s, out_file,
  show_tools_s, show_thinking_s, show_raw_s, want_json_s,
- settings_path, prompt_history_path, live_raw) = sys.argv[1:14]
+ settings_path, prompt_history_path, tasks_dir, limit_set_s, live_raw) = sys.argv[1:16]
 
 limit = int(limit_s)
 show_tools = show_tools_s == "1"
 show_thinking = show_thinking_s == "1"
 show_raw = show_raw_s == "1"
 want_json = want_json_s == "1"
+limit_set = limit_set_s == "1"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -164,7 +170,7 @@ def die(msg):
 
 
 def fmt_time(ts):
-    if not ts:
+    if not ts or ts <= 0:
         return "?"
     return time.strftime("%Y-%m-%d %H:%M", time.localtime(ts))
 
@@ -241,8 +247,11 @@ def session_files(root):
         for name in sorted(os.listdir(pdir)):
             # <session>.jsonl 才是当前记录；.orphaned-* / .superseded-* 是被搁置的旧版本，
             # 官方文档说它们本来就不出现在 /resume 的列表里，这里也跳过
-            if name.endswith(".jsonl") and ".orphaned-" not in name:
-                yield os.path.join(pdir, name)
+            if not name.endswith(".jsonl"):
+                continue
+            if ".orphaned-" in name or ".superseded-" in name:
+                continue
+            yield os.path.join(pdir, name)
 
 
 BIG_FILE = 50 * 1024 * 1024   # 超过这个大小就不整份解析了，用文件头 + mtime 估
@@ -264,7 +273,8 @@ def strip_injected(text):
                 break
             j = out.find(close_t, i)
             if j < 0:
-                out = out[:i]
+                # 没有收尾标签就只去掉这个标签本身，绝不把后面的正文一起吞掉
+                out = out[:i] + out[i + len(open_t):]
                 break
             out = out[:i] + out[j + len(close_t):]
     return out
@@ -277,7 +287,7 @@ def scan_meta(path):
         "id": os.path.basename(path)[:-6],
         "cwd": "", "branch": "", "version": "", "entrypoint": "", "title": "",
         "mtime": 0.0, "size": 0, "start": 0.0, "end": 0.0,
-        "messages": 0, "approx": False,
+        "messages": 0, "records": 0, "approx": False,
     }
     try:
         meta["mtime"] = os.path.getmtime(path)
@@ -307,11 +317,14 @@ def scan_meta(path):
                         meta["start"] = ts
                     meta["end"] = ts
                 if o.get("type") in ("user", "assistant") and not o.get("isSidechain"):
-                    meta["messages"] += 1
-                    if not meta["title"] and o.get("type") == "user":
-                        body, _, _ = text_of((o.get("message") or {}).get("content"))
+                    meta["records"] += 1
+                    body, _, _ = text_of((o.get("message") or {}).get("content"))
+                    if o.get("type") == "user":
                         body = strip_injected(body)
-                        if body.strip():
+                    if body.strip():
+                        # 只数 show / export 真会打出来的那些，免得列表说 200 条、打开只有 6 段
+                        meta["messages"] += 1
+                        if not meta["title"] and o.get("type") == "user":
                             meta["title"] = oneline(body)
                 if partial and i > 400 and meta["title"]:
                     meta["approx"] = True
@@ -319,29 +332,54 @@ def scan_meta(path):
     except (IOError, OSError):
         return None
     if meta["approx"]:
+        # 提前收工的那条路：条数退回行数（会偏多），最后活动时间用文件的 mtime 才准
         try:
             with open(path, "rb") as f:
                 meta["messages"] = sum(c.count(b"\n") for c in iter(lambda: f.read(1 << 20), b""))
         except (IOError, OSError):
             pass
+        meta["end"] = meta["mtime"]
     if not meta["end"]:
         meta["end"] = meta["mtime"]
-    if meta["messages"] == 0:
+    if meta["messages"] == 0 and meta["records"] == 0:
         return None      # 开了没说话就退出的空会话，不值得列
     return meta
 
 
+UNREADABLE = []
+
+
+def under_dir(cwd, fd):
+    if not cwd or not fd:
+        return False
+    a, b = os.path.realpath(cwd), fd
+    if a == b or a.startswith(b + os.sep):
+        return True
+    # macOS 默认的卷不区分大小写，~/Code 和 ~/code 是同一个目录
+    a, b = a.lower(), b.lower()
+    return a == b or a.startswith(b + os.sep)
+
+
 def load_sessions(root, filter_dir):
     out = []
+    del UNREADABLE[:]
     fd = os.path.realpath(os.path.expanduser(filter_dir)) if filter_dir else ""
     for path in session_files(root):
+        if not os.access(path, os.R_OK):
+            UNREADABLE.append(path)
+            continue
         m = scan_meta(path)
+        if m is None and os.path.getsize(path) > 0:
+            # 有内容却读不出来（权限、坏文件）—— 记下来，别让它悄悄消失
+            try:
+                with open(path, "r", encoding="utf-8", errors="replace") as f:
+                    f.read(1)
+            except (IOError, OSError):
+                UNREADABLE.append(path)
         if not m:
             continue
-        if fd:
-            cwd = os.path.realpath(m["cwd"]) if m["cwd"] else ""
-            if not cwd or not (cwd == fd or cwd.startswith(fd + os.sep)):
-                continue
+        if fd and not under_dir(m["cwd"], fd):
+            continue
         out.append(m)
     out.sort(key=lambda m: m["end"], reverse=True)
     return out
@@ -387,7 +425,7 @@ def iter_records(path):
                 continue
 
 
-def render(meta, out):
+def render(meta, out, tail=0):
     live = live_map().get(meta["id"])
     out.append("# 会话 %s" % meta["id"])
     out.append("")
@@ -404,8 +442,29 @@ def render(meta, out):
         out.append("- 说明: 已隐藏 system-reminder 等注入内容（想看全部加 --raw）")
     out.append("")
 
+    body_lines = []
+    kept = 0
+    records = list(iter_records(meta["path"]))
+    if tail > 0:
+        # 只留最后 N 条会显示出来的消息（手机上看旧对话时很有用）
+        visible = []
+        for idx, o in enumerate(records):
+            if o.get("isSidechain") or o.get("type") not in ("user", "assistant"):
+                continue
+            b, _t, _u = text_of((o.get("message") or {}).get("content"))
+            if o.get("type") == "user":
+                b = strip_injected(b)
+            if b.strip():
+                visible.append(idx)
+        if len(visible) > tail:
+            cut = visible[-tail]
+            out.append("_（只显示最后 %d 条，全部用 --limit 0）_" % tail)
+            out.append("")
+            records = records[cut:]
+        kept = len(visible)
+
     last_role = None
-    for o in iter_records(meta["path"]):
+    for o in records:
         if o.get("isSidechain"):
             continue
         typ = o.get("type")
@@ -415,7 +474,8 @@ def render(meta, out):
         body, thinking, tools = text_of(msg.get("content"))
         if typ == "user":
             body = strip_injected(body)
-        stamp = time.strftime("%H:%M:%S", time.localtime(parse_ts(o.get("timestamp"))))
+        ts = parse_ts(o.get("timestamp"))
+        stamp = time.strftime("%H:%M:%S", time.localtime(ts)) if ts > 0 else "?"
         who = "👤 你" if typ == "user" else "🤖 Claude"
         if typ == "user" and not body.strip() and not show_tools:
             continue  # 纯 tool_result 的 user 记录
@@ -438,6 +498,7 @@ def render(meta, out):
             for name, summary in tools:
                 out.append("- `%s` %s" % (name, oneline(summary, 160)))
             out.append("")
+    del body_lines, kept
     return out
 
 
@@ -474,27 +535,68 @@ def cmd_list():
         if s["title"]:
             print("   %s" % s["title"])
         print("")
-    print("%s共 %d 个会话，显示 %d 个。● = 此刻正在运行。%s"
+    if UNREADABLE:
+        print("  ! 有 %d 个记录文件读不了（权限或损坏），没有列进来，例如 %s"
+              % (len(UNREADABLE), UNREADABLE[0]))
+    print("%s共 %d 个会话，显示 %d 个。● = 此刻正在运行；~ = 文件太大，条数是估的。%s"
           % (DIM, len(sessions), len(shown), RESET))
     print("%s看某一个: bash claude-history.sh show %s%s"
           % (DIM, shown[0]["id"][:8], RESET))
 
 
+def tail_count():
+    return limit if (limit_set and limit > 0) else 0
+
+
 def cmd_show():
-    sessions = load_sessions(projects_dir, "")
+    sessions = load_sessions(projects_dir, filter_dir)
     meta = resolve(sessions, target)
-    out = render(meta, [])
-    print("\n".join(out))
+    print("\n".join(render(meta, [], tail_count())))
+
+
+def write_md(dest, lines):
+    try:
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+    except (IOError, OSError) as e:
+        die("写不了 %s：%s（换个 --out 路径）" % (dest, e))
+    return os.path.getsize(dest)
+
+
+def cmd_export_all():
+    sessions = load_sessions(projects_dir, filter_dir)
+    if not sessions:
+        die("没有可导出的会话")
+    dest_dir = out_file or "claude-history"
+    try:
+        if not os.path.isdir(dest_dir):
+            os.makedirs(dest_dir)
+    except OSError as e:
+        die("建不了目录 %s：%s" % (dest_dir, e))
+    total = 0
+    for m in sessions:
+        day = time.strftime("%Y%m%d", time.localtime(m["end"] or m["mtime"]))
+        name = "%s-%s.md" % (day, m["id"][:8])
+        total += write_md(os.path.join(dest_dir, name), render(m, [], tail_count()))
+    print("已导出 %d 个会话到 %s（合计 %s）"
+          % (len(sessions), os.path.abspath(dest_dir), human_size(total)))
+    print("文件在这台机器上。要拿到手机/网页那边，让远程会话把某个文件念出来，"
+          "或者自己 scp / AirDrop / 提交进一个仓库。")
 
 
 def cmd_export():
-    sessions = load_sessions(projects_dir, "")
+    if target == "all":
+        return cmd_export_all()
+    sessions = load_sessions(projects_dir, filter_dir)
     meta = resolve(sessions, target)
-    out = render(meta, [])
+    out = render(meta, [], tail_count())
     dest = out_file or ("claude-%s.md" % meta["id"][:8])
-    with open(dest, "w", encoding="utf-8") as f:
-        f.write("\n".join(out) + "\n")
-    print("已写入 %s (%s)" % (dest, human_size(os.path.getsize(dest))))
+    try:
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write("\n".join(out) + "\n")
+    except (IOError, OSError) as e:
+        die("写不了 %s：%s（换个 --out 路径）" % (dest, e))
+    print("已写入 %s (%s)" % (os.path.abspath(dest), human_size(os.path.getsize(dest))))
 
 
 def cmd_search():
@@ -539,12 +641,13 @@ def cmd_search():
 
 
 def cmd_resume():
-    sessions = load_sessions(projects_dir, "")
+    sessions = load_sessions(projects_dir, filter_dir)
     meta = resolve(sessions, target)
-    cwd = meta["cwd"] or "<目录未知>"
+    cwd = meta["cwd"] or ""
+    cwd_q = shlex.quote(cwd) if cwd else "<目录未知>"
     live = live_map().get(meta["id"])
     print("会话 %s" % meta["id"])
-    print("  目录: %s" % cwd)
+    print("  目录: %s" % (cwd or "?"))
     print("  最后活动: %s" % fmt_time(meta["end"]))
     if meta["title"]:
         print("  开头: %s" % meta["title"])
@@ -554,16 +657,22 @@ def cmd_resume():
               "或者加 --fork-session 另开一份副本。" % live.get("pid"))
         print("")
     print("在这台机器的终端里接着聊：")
-    print("  cd %s && claude --resume %s" % (cwd, meta["id"]))
+    print("  cd %s && claude --resume %s" % (cwd_q, meta["id"]))
     print("")
     print("从网页 / 远程会话里后台拉起（不需要终端，拉起后用 claude logs <短id> 看输出）：")
-    print("  cd %s && claude --bg --resume %s \"接着上面的活儿继续\"" % (cwd, meta["id"]))
+    print("  cd %s && claude --bg --resume %s \"接着上面的活儿继续\"" % (cwd_q, meta["id"]))
     print("")
     print("不想动原来的记录，就另开一份副本：加 --fork-session")
 
 
 def cmd_live():
-    arr = json.loads(live_raw) if live_raw.strip() else []
+    try:
+        arr = json.loads(live_raw) if live_raw.strip() else []
+    except ValueError:
+        die("`claude agents --json` 返回的不是 JSON，读不出正在运行的会话：\n%s"
+            % oneline(live_raw, 300))
+    if not isinstance(arr, list):
+        arr = []
     if want_json:
         print(json.dumps(arr, ensure_ascii=False, indent=2))
         return
@@ -632,7 +741,9 @@ def cmd_prompts():
     if not rows:
         print("没找到匹配的 prompt。" if needle else "%s 是空的。" % prompt_history_path)
         return
-    rows.reverse()               # 文件里是从旧到新，倒过来先看最近的
+    # 文件是追加写的，所以先按文件顺序倒过来；有时间戳的再按时间排，保证 --limit 留的是最近的
+    rows.reverse()
+    rows.sort(key=lambda r: r["at"] or 0, reverse=True)
     shown = rows[: limit or None]
     if want_json:
         print(json.dumps(shown, ensure_ascii=False, indent=2))
@@ -642,11 +753,87 @@ def cmd_prompts():
         print("  %s" % oneline(strip_injected(r["text"]), 200))
         print("")
     print("%s共 %d 条，显示 %d 条（--limit 0 看全部）%s" % (DIM, len(rows), len(shown), RESET))
+    print("%shistory.jsonl 里没有会话 ID；想找回是哪段对话，拿这句话的一小段去 search：%s" % (DIM, RESET))
+    print("%s  bash claude-history.sh search \"%s\"%s"
+          % (DIM, oneline(strip_injected(shown[0]["text"]), 20).replace('"', "'"), RESET))
+
+
+def dir_size(path):
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(root, name))
+            except OSError:
+                pass
+    return total
+
+
+def cmd_routines():
+    """桌面 App 的本地 routine：prompt 在 SKILL.md 里，时间 / 目录 / 模型 / 暂停状态不在文件里"""
+    if not os.path.isdir(tasks_dir):
+        print("没有 %s —— 这台机器上还没有桌面 App 的本地 routine" % tasks_dir)
+        print("（云端 routine 不在这里，它们在 claude.ai 账号里，网页端 claude.ai/code/routines 就能看）")
+        return
+    rows = []
+    for name in sorted(os.listdir(tasks_dir)):
+        skill = os.path.join(tasks_dir, name, "SKILL.md")
+        if not os.path.isfile(skill):
+            continue
+        title, desc, body = "", "", ""
+        try:
+            with open(skill, "r", encoding="utf-8", errors="replace") as f:
+                text = f.read()
+        except (IOError, OSError):
+            text = ""
+        lines = text.splitlines()
+        in_fm = False
+        for i, line in enumerate(lines):
+            if i == 0 and line.strip() == "---":
+                in_fm = True
+                continue
+            if in_fm:
+                if line.strip() == "---":
+                    in_fm = False
+                    body = " ".join(x for x in lines[i + 1:] if x.strip())
+                    break
+                if line.startswith("name:"):
+                    title = line[5:].strip()
+                elif line.startswith("description:"):
+                    desc = line[12:].strip()
+        if not body:
+            body = " ".join(x for x in lines if x.strip() and x.strip() != "---")
+        rows.append({"dir": name, "name": title, "description": desc,
+                     "prompt": body, "path": skill,
+                     "mtime": os.path.getmtime(skill) if os.path.exists(skill) else 0})
+    if want_json:
+        print(json.dumps(rows, ensure_ascii=False, indent=2))
+        return
+    if not rows:
+        print("%s 下没有 SKILL.md" % tasks_dir)
+        return
+    for r in rows:
+        print("%s%s%s  %s" % (BOLD, r["dir"], RESET, fmt_time(r["mtime"])))
+        if r["name"] and r["name"] != r["dir"]:
+            print("   名字: %s" % r["name"])
+        if r["description"]:
+            print("   说明: %s" % oneline(r["description"], 120))
+        print("   prompt: %s" % oneline(r["prompt"], 160))
+        print("   文件: %s" % r["path"])
+        print("")
+    print("%s共 %d 个本地 routine。改 SKILL.md 下次运行生效；" % (DIM, len(rows)))
+    print("时间 / 工作目录 / 模型 / 暂停状态不在文件里，只能在桌面 App 的 Routines 页面改。%s" % RESET)
 
 
 def cmd_where():
     sessions = load_sessions(projects_dir, "")
     total = sum(s["size"] for s in sessions)
+    # 每个会话旁边还有一个同名目录（subagents/、tool-results/），一起算才是真占了多少
+    extra = 0
+    for s in sessions:
+        side = s["path"][:-6]
+        if os.path.isdir(side):
+            extra += dir_size(side)
     projects = {}
     for s in sessions:
         projects[s["cwd"] or "?"] = projects.get(s["cwd"] or "?", 0) + 1
@@ -661,7 +848,12 @@ def cmd_where():
                     orphaned += 1
 
     print("聊天记录（transcript）: %s/<项目>/<会话ID>.jsonl" % projects_dir)
-    print("  %d 个会话，合计 %s" % (len(sessions), human_size(total)))
+    print("  %d 个会话，transcript 合计 %s%s"
+          % (len(sessions), human_size(total),
+             ("，子 agent / 大段工具输出再占 %s" % human_size(extra)) if extra else ""))
+    if UNREADABLE:
+        print("  另有 %d 个文件读不了（权限或损坏），没算进来，例如 %s"
+              % (len(UNREADABLE), UNREADABLE[0]))
     if sessions:
         print("  最早 %s   最近 %s"
               % (fmt_time(min(s["start"] or s["end"] for s in sessions)),
@@ -713,5 +905,5 @@ def cmd_where():
 
 {"list": cmd_list, "show": cmd_show, "search": cmd_search, "export": cmd_export,
  "resume": cmd_resume, "live": cmd_live, "where": cmd_where,
- "prompts": cmd_prompts}[mode]()
+ "prompts": cmd_prompts, "routines": cmd_routines}[mode]()
 PY

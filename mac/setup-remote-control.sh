@@ -102,7 +102,8 @@ case "$SPAWN_MODE" in
 esac
 
 if [[ -n "$CAPACITY" ]]; then
-  [[ "$CAPACITY" =~ ^[0-9]+$ && "$CAPACITY" -gt 0 ]] || die "--capacity 要是正整数: $CAPACITY"
+  # 不用算术比较：bash 把 08 / 09 当八进制，会直接报错退出
+  [[ "$CAPACITY" =~ ^[1-9][0-9]{0,3}$ ]] || die "--capacity 要是 1..9999 的整数（别写前导 0）: $CAPACITY"
   [[ "$SPAWN_MODE" != "session" ]] || die "--spawn session 只服务一个会话，不能同时给 --capacity"
 fi
 
@@ -249,12 +250,16 @@ $out"
 # 后台服务会起不来并被 KeepAlive 反复重启，所以先在帮助里确认这个 flag 存在
 require_rc_flag() {
   local flag="$1"
-  [[ -n "$RC_HELP" ]] || return 0
-  grep -q -- "$flag" <<<"$RC_HELP" && return 0
+  # 整词匹配，别让 --spawn-mode 之类的近似写法蒙混过关
+  if [[ -n "$RC_HELP" ]] && grep -qE -- "(^|[^-[:alnum:]])$flag([^-[:alnum:]]|\$)" <<<"$RC_HELP"; then
+    return 0
+  fi
+  local why="这台机器的 claude remote-control 不支持 $flag"
+  [[ -n "$RC_HELP" ]] || why="没能从 claude remote-control --help 读到任何东西，无法确认它支持 $flag"
   if (( DRY_RUN )); then
-    warn "这台机器的 claude remote-control 没有 $flag（dry-run 继续）"
+    warn "$why（dry-run 继续）"
   else
-    die "这台机器的 claude remote-control 不支持 $flag。升级 claude（$(update_hint)）或者去掉这个参数"
+    die "$why。升级 claude（$(update_hint)）或者去掉这个参数"
   fi
 }
 
@@ -323,6 +328,16 @@ preflight() {
 
   [[ -d "$PROJECT_DIR" ]] || die "目录不存在: $PROJECT_DIR"
   PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+
+  if [[ "$SPAWN_MODE" == "worktree" ]]; then
+    if ! git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      if (( DRY_RUN )); then
+        warn "$PROJECT_DIR 不是 git 仓库，真实安装时会拒绝 --spawn worktree"
+      else
+        die "--spawn worktree 需要工作目录是一个 git 仓库，$PROJECT_DIR 不是。换个目录，或者去掉 --spawn"
+      fi
+    fi
+  fi
   if [[ "$PROJECT_DIR" == "$HOME" || "$PROJECT_DIR" == "/" ]]; then
     die "不能用家目录或根目录当工作目录（Claude 从不信任它们）。cd 到一个项目目录再运行，或加 --dir <路径>"
   fi
