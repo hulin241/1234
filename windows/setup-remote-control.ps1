@@ -57,7 +57,7 @@ function Ok($m)   { Write-Host "  √ $m" -ForegroundColor Green }
 function Warn($m) { Write-Host "  ! $m" -ForegroundColor Yellow }
 function Die($m)  { Write-Host "  × $m" -ForegroundColor Red; exit 1 }
 
-if ($Name -match "[`"'`r`n]") { Die "-Name 里不能有引号或换行" }
+if ($Name -match "[`"'`$``\r\n]") { Die "-Name 里不能有引号、`$、反引号或换行" }
 
 # 在 $ErrorActionPreference = "Stop" 下，PowerShell 5.1 会把原生程序写到 stderr 的内容当成终止错误；
 # 所以调用 claude / git 时临时放宽，并把输出统一转成字符串数组
@@ -249,15 +249,19 @@ function Enable-StartupSetting {
 function Build-RunScript {
   $sessionName = if ($Name) { $Name } else { $env:COMPUTERNAME }
   $extra = if ($PermissionMode) { " --permission-mode $PermissionMode" } else { "" }
+  # 写进生成脚本的单引号字符串，路径里的单引号要写成两个
+  $qDir = $Dir -replace "'", "''"; $qLog = $LogFile -replace "'", "''"; $qClaude = $Claude -replace "'", "''"
+  $confLine = if ($env:CLAUDE_CONFIG_DIR) { "`$env:CLAUDE_CONFIG_DIR = '$($env:CLAUDE_CONFIG_DIR -replace "'", "''")'" } else { "" }
   # 不把 claude 的输出重定向到文件：保留控制台，避免它因为没有终端而拒绝启动。会话链接去 claude.ai/code 侧边栏里按名字找
   return @"
 # 由 setup-remote-control.ps1 生成，任务计划程序「$TaskName」在登录时运行它
 `$ErrorActionPreference = 'Continue'
-Set-Location -LiteralPath '$Dir'
-`$log = '$LogFile'
+$confLine
+Set-Location -LiteralPath '$qDir'
+`$log = '$qLog'
 while (`$true) {
   Add-Content -LiteralPath `$log -Value "[`$(Get-Date -Format s)] 启动 claude remote-control（$sessionName）"
-  & '$Claude' remote-control --name '$sessionName'$extra
+  & '$qClaude' remote-control --name '$sessionName'$extra
   Add-Content -LiteralPath `$log -Value "[`$(Get-Date -Format s)] 退出，代码 `$LASTEXITCODE，30 秒后重启"
   Start-Sleep -Seconds 30
 }
@@ -278,12 +282,12 @@ function Install-Task {
     Log "已有旧的任务，先停掉"
     Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     Stop-ServerProcesses
-    Start-Sleep -Seconds 2
+    for ($i = 0; $i -lt 15 -and (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue).State -eq "Running"; $i++) { Start-Sleep -Seconds 1 }
   }
   if (Test-Path -LiteralPath $LogFile) { Move-Item -LiteralPath $LogFile -Destination "$LogFile.1" -Force }
   [IO.File]::WriteAllText($RunScript, $run, $Utf8Bom)
 
-  $user = "$env:USERDOMAIN\$env:USERNAME"
+  $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
   $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$RunScript`""
   $trigger = New-ScheduledTaskTrigger -AtLogOn -User $user
   $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
