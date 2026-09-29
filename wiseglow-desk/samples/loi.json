@@ -1,0 +1,197 @@
+{
+  "document_id": "loi-progetto-mesagne-5mw",
+  "doc_type": "LOI",
+  "language": "it",
+  "title": "Lettera di Intenti",
+  "subtitle": "Cessione del progetto fotovoltaico \"Mesagne Solare\" – 5 MWp, Comune di Mesagne (BR)",
+  "reference": "WG-LOI-2026-007",
+  "date": "2026-09-29",
+  "place": "Ancona",
+  "confidential": true,
+  "status": "Bozza",
+  "recipient": {
+    "company": "Aurora Green Invest S.p.A.",
+    "name": "Dott.ssa Elena Marchetti",
+    "role": "Head of Investments – Italia",
+    "address": "Piazza Affari 4 – 20123 Milano (MI)",
+    "email": "investments@auroragreen.example"
+  },
+  "parties": [
+    {
+      "role": "Venditore",
+      "name": "WiseGlow S.r.l.",
+      "details": "Piazza Pericle Fazzini 8, 63074 San Benedetto del Tronto (AP) – P.IVA 02561900446 – titolare del 100% di Mesagne Solare S.r.l."
+    },
+    {
+      "role": "Acquirente",
+      "name": "Aurora Green Invest S.p.A.",
+      "details": "Piazza Affari 4 – 20123 Milano (MI) – P.IVA [DA CONFERMARE]"
+    },
+    {
+      "role": "Società di progetto",
+      "name": "Mesagne Solare S.r.l. (la \"SPV\")",
+      "details": "Società veicolo titolare dei diritti, dei titoli e dei contratti relativi al Progetto"
+    }
+  ],
+  "key_facts": [
+    ["Progetto", "Impianto fotovoltaico a terra \"Mesagne Solare\", potenza 5,0 MWp / 4,2 MW in immissione"],
+    ["Stato di sviluppo", "Ready-to-Build (RTB) atteso entro il primo trimestre 2027"],
+    ["Operazione", "Cessione del 100% delle quote della SPV"],
+    ["Enterprise value indicativo", "€ 120.000 per MWp, pari a € 600.000 alla condizione RTB"],
+    ["Esclusiva", "90 giorni dalla sottoscrizione"],
+    ["Closing atteso", "Entro 30 giorni dal raggiungimento della condizione RTB"]
+  ],
+  "intro": "La presente lettera di intenti (di seguito la **LOI**) descrive i termini e le condizioni principali sui quali WiseGlow S.r.l. e Aurora Green Invest S.p.A. intendono negoziare in buona fede la cessione del progetto fotovoltaico \"Mesagne Solare\".",
+  "sections": [
+    {
+      "heading": "1. Premesse",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "bullets",
+          "items": [
+            "WiseGlow S.r.l. (il **Venditore**) è una società attiva nello sviluppo di impianti fotovoltaici e detiene l'intero capitale sociale di Mesagne Solare S.r.l. (la **SPV**).",
+            "La SPV è titolare dei diritti di superficie su terreni agricoli per circa 9 ha nel Comune di Mesagne (BR), della soluzione tecnica minima generale (STMG) accettata per 4,2 MW e dell'istanza di autorizzazione (PAS/AU) in corso di istruttoria (il **Progetto**).",
+            "Aurora Green Invest S.p.A. (l'**Acquirente**) è un investitore istituzionale interessato ad acquisire il Progetto per realizzarlo e gestirlo in proprio.",
+            "Le Parti intendono definire con la presente LOI il quadro dell'operazione, rinviando a un contratto di compravendita di quote (**SPA**) la disciplina definitiva."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "2. Oggetto dell'operazione",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "L'operazione ha per oggetto la cessione all'Acquirente del **100% delle quote della SPV**, con tutti i diritti, i titoli, i contratti e la documentazione tecnica relativi al Progetto, al raggiungimento della condizione **Ready-to-Build** (di seguito **RTB**), come definita al punto 3."
+        },
+        {
+          "type": "paragraph",
+          "text": "Il Venditore continuerà a curare, a proprie spese, l'iter autorizzativo fino alla condizione RTB. L'Acquirente potrà partecipare, come osservatore, alle interlocuzioni con gli enti e con il gestore di rete."
+        }
+      ]
+    },
+    {
+      "heading": "3. Termini economici principali",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Il prezzo indicativo per il 100% delle quote della SPV è determinato in **€ 120.000 per MWp** installabile, per un importo complessivo stimato di **€ 600.000,00** alla condizione RTB, con il seguente meccanismo di pagamento:"
+        },
+        {
+          "type": "table",
+          "columns": ["Milestone", "Quota", "Importo", "Condizione"],
+          "col_widths": [30, 12, 20, 38],
+          "rows": [
+            ["Firma dello SPA", "20%", "€ 120.000", "Sottoscrizione dello SPA ed esito positivo della due diligence"],
+            ["Condizione RTB", "60%", "€ 360.000", "Titolo autorizzativo definitivo, STMG accettata, diritti fondiari trascritti"],
+            ["Entrata in esercizio (COD)", "20%", "€ 120.000", "Collegamento alla rete e avvio dell'esercizio commerciale"],
+            ["**Totale**", "**100%**", "**€ 600.000**", ""]
+          ],
+          "caption": "Tabella 1 – Milestone di pagamento. Il prezzo sarà rideterminato pro quota sulla potenza effettivamente autorizzata."
+        },
+        {
+          "type": "callout",
+          "style": "info",
+          "text": "**Aggiustamento del prezzo.** Qualora la potenza autorizzata risulti inferiore a 4,5 MWp, le Parti rinegozieranno in buona fede il prezzo; al di sotto di 4,0 MWp ciascuna Parte potrà recedere dalla LOI senza penali."
+        },
+        {
+          "type": "paragraph",
+          "text": "Il prezzo si intende *cash free / debt free*: eventuali debiti della SPV alla data del closing, ivi inclusi i costi di sviluppo non ancora liquidati, saranno dedotti dal corrispettivo dovuto al Venditore."
+        }
+      ]
+    },
+    {
+      "heading": "4. Due diligence",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "L'Acquirente svolgerà, a proprie spese ed entro **45 giorni** dalla sottoscrizione della presente LOI, una due diligence legale, tecnica, urbanistica e fiscale sulla SPV e sul Progetto. Il Venditore metterà a disposizione una data room virtuale contenente, tra l'altro:"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "atto costitutivo, statuto, libri sociali e bilanci della SPV;",
+            "contratti di diritto di superficie, con relative trascrizioni e planimetrie;",
+            "preventivo di connessione (STMG) accettato e corrispondenza con e-distribuzione;",
+            "istanza autorizzativa, pareri acquisiti e relazioni specialistiche (paesaggistica, geologica, agronomica);",
+            "progetto definitivo, layout e stima di producibilità (P50/P90)."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "5. Esclusiva",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Per un periodo di **90 giorni** dalla sottoscrizione della presente LOI (il **Periodo di Esclusiva**) il Venditore si impegna a non sollecitare, avviare o proseguire trattative con terzi aventi ad oggetto la cessione, in tutto o in parte, della SPV o del Progetto. Il Periodo di Esclusiva potrà essere prorogato di ulteriori 30 giorni per iscritto, di comune accordo."
+        }
+      ]
+    },
+    {
+      "heading": "6. Riservatezza",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Le Parti si impegnano a trattare come strettamente riservate tutte le informazioni scambiate in relazione all'operazione, ivi compresa l'esistenza della presente LOI, per un periodo di 24 mesi dalla sua sottoscrizione, anche in caso di mancata conclusione dell'operazione. Resta salva la comunicazione ai propri consulenti, finanziatori e organi sociali, tenuti ad analogo vincolo."
+        }
+      ]
+    },
+    {
+      "heading": "7. Natura non vincolante",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "callout",
+          "style": "warning",
+          "text": "Ad eccezione delle clausole relative a **Esclusiva (5)**, **Riservatezza (6)**, **Durata (8)** e **Legge applicabile e foro (9)**, che sono vincolanti, la presente LOI ha natura non vincolante e non obbliga le Parti a concludere l'operazione. Ogni obbligo di compravendita sorgerà esclusivamente con la sottoscrizione dello SPA."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ciascuna Parte sosterrà i propri costi e le proprie spese relativi alla negoziazione, alla due diligence e alla predisposizione della documentazione contrattuale."
+        }
+      ]
+    },
+    {
+      "heading": "8. Durata",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "La presente LOI resterà efficace fino alla prima tra le seguenti date: (i) la sottoscrizione dello SPA; (ii) la scadenza del Periodo di Esclusiva, salvo proroga; (iii) la comunicazione scritta di una Parte all'altra della volontà di non proseguire le trattative."
+        }
+      ]
+    },
+    {
+      "heading": "9. Legge applicabile e foro",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "La presente LOI è regolata dalla legge italiana. Per ogni controversia relativa alla sua validità, interpretazione, esecuzione o risoluzione sarà competente in via esclusiva il **Foro di Ancona**."
+        },
+        {
+          "type": "quote",
+          "text": "Le Parti dichiarano di aver negoziato ogni clausola della presente LOI e di averne compreso la portata, anche ai sensi e per gli effetti degli artt. 1341 e 1342 del codice civile."
+        }
+      ]
+    }
+  ],
+  "closing": "In caso di condivisione dei termini sopra esposti, Vi preghiamo di restituirci la presente LOI sottoscritta per accettazione. Saremo lieti di organizzare a stretto giro un incontro tecnico per l'avvio della due diligence.",
+  "signatures": [
+    { "party": "WiseGlow S.r.l.", "name": "[DA CONFERMARE: nome firmatario]", "title": "Amministratore Unico" },
+    { "party": "Aurora Green Invest S.p.A.", "name": "Elena Marchetti", "title": "Head of Investments – Italia" }
+  ],
+  "attachments": [
+    "Allegato 1 – Scheda tecnica del Progetto e layout preliminare",
+    "Allegato 2 – Elenco della documentazione in data room",
+    "Allegato 3 – Cronoprogramma autorizzativo"
+  ],
+  "notes": "Bozza predisposta da WiseGlow S.r.l. per la discussione tra le Parti. I valori economici sono indicativi e soggetti a due diligence. Il presente documento non sostituisce il parere dei consulenti legali e fiscali delle Parti. I campi contrassegnati con [DA CONFERMARE] devono essere completati prima della sottoscrizione."
+}

@@ -1,0 +1,142 @@
+{
+  "document_id": "interesse-terreno-nardo-carrozzo",
+  "doc_type": "INTERESSE_TERRENO",
+  "language": "it",
+  "title": "Manifestazione di Interesse",
+  "subtitle": "Terreno in Contrada Sant'Elia – Comune di Nardò (LE), circa 8 ha",
+  "reference": "WG-MI-2026-031",
+  "date": "2026-09-29",
+  "place": "Ancona",
+  "confidential": false,
+  "status": "Bozza",
+  "recipient": {
+    "name": "Gentile Sig. Giovanni Carrozzo",
+    "address": "Contrada Sant'Elia, s.n.c. – 73048 Nardò (LE)"
+  },
+  "key_facts": [
+    ["Terreno", "Contrada Sant'Elia, Nardò (LE) – Foglio 52, particelle 8, 9 e 21"],
+    ["Superficie stimata", "Circa 8,0 ha, prevalentemente seminativo"],
+    ["Nostro interesse", "Realizzare un impianto fotovoltaico a terra di circa 6 MWp"],
+    ["Formule proposte", "Acquisto, diritto di superficie (30 anni) oppure affitto (30 anni)"],
+    ["Impegno per Lei", "Nessuno: la presente non è vincolante e non comporta costi"]
+  ],
+  "intro": "Gentile Sig. Carrozzo,\nsiamo **WiseGlow**, una società italiana che progetta e realizza impianti per la produzione di energia solare. Le scriviamo perché il Suo terreno in Contrada Sant'Elia presenta caratteristiche molto interessanti per un nostro progetto, e vorremmo proporLe un incontro senza alcun impegno da parte Sua.",
+  "sections": [
+    {
+      "heading": "1. Chi siamo",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "WiseGlow S.r.l. sviluppa impianti fotovoltaici in Italia, occupandosi di tutte le fasi: individuazione delle aree, progettazione, autorizzazioni, costruzione e gestione. Lavoriamo con proprietari terrieri, aziende agricole e amministrazioni locali con un principio semplice: **il terreno resta una risorsa per chi lo possiede** e il progetto deve portare un beneficio concreto e duraturo al territorio."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Impianti progettati per convivere con l'attività agricola (moduli sopraelevati, fasce di rispetto, pascolo o colture tra le file).",
+            "Corrispettivi chiari, indicizzati e garantiti per tutta la durata del contratto.",
+            "Ripristino del terreno a fine vita dell'impianto, con garanzia finanziaria a favore del proprietario."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "2. Il terreno",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Dalle nostre analisi preliminari, il terreno censito al **Foglio 52, particelle 8, 9 e 21** del Comune di Nardò, per circa 8 ettari, presenta i requisiti che cerchiamo:"
+        },
+        {
+          "type": "table",
+          "columns": ["Caratteristica", "Valutazione preliminare"],
+          "col_widths": [35, 65],
+          "rows": [
+            ["Esposizione e morfologia", "Pianeggiante, esposizione libera, nessun ombreggiamento rilevante"],
+            ["Accesso", "Diretto dalla strada comunale, adatto ai mezzi di cantiere"],
+            ["Rete elettrica", "Linea MT a circa 800 m; cabina primaria a circa 4 km"],
+            ["Vincoli", "Nessun vincolo paesaggistico rilevato in prima analisi (da confermare)"],
+            ["Uso attuale", "Seminativo, in parte incolto"]
+          ],
+          "caption": "Valutazione basata su dati pubblici e su un sopralluogo esterno; da confermare con Lei."
+        }
+      ]
+    },
+    {
+      "heading": "3. La nostra proposta",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Siamo flessibili sulla formula: la scegliamo insieme a Lei in base alle Sue esigenze familiari, fiscali e aziendali. Queste sono le tre opzioni che proponiamo, con valori **indicativi** che confermeremo dopo le verifiche tecniche:"
+        },
+        {
+          "type": "table",
+          "columns": ["Formula", "Corrispettivo indicativo", "Durata", "Cosa comporta per Lei"],
+          "col_widths": [22, 26, 14, 38],
+          "rows": [
+            ["**Acquisto**", "€ 45.000 – 55.000 per ettaro, in un'unica soluzione al rogito", "—", "Cessione della piena proprietà; nessun impegno successivo"],
+            ["**Diritto di superficie**", "€ 2.800 – 3.200 per ettaro all'anno, indicizzato ISTAT", "30 anni", "Lei resta proprietario; canone annuo garantito; terreno restituito a fine contratto"],
+            ["**Affitto**", "€ 2.500 – 2.900 per ettaro all'anno, indicizzato ISTAT", "30 anni", "Come sopra, con contratto di locazione; possibile pascolo tra le file"]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "info",
+          "text": "Per il diritto di superficie e l'affitto, WiseGlow riconosce inoltre un **bonus alla firma** pari a una annualità di canone e si fa carico di tutte le spese di progettazione, autorizzazione, costruzione, assicurazione e smantellamento."
+        },
+        {
+          "type": "paragraph",
+          "text": "In tutte le formule, il canone o il prezzo decorrono dalla firma del contratto definitivo; durante la fase di autorizzazione (in genere 12–24 mesi) è previsto un **canone di opzione** di € 300 per ettaro all'anno, a titolo di riconoscimento per la disponibilità del terreno."
+        }
+      ]
+    },
+    {
+      "heading": "4. Prossimi passi",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "numbered",
+          "items": [
+            "**Un incontro conoscitivo**, a Nardò o dove preferisce, per presentarci e ascoltare le Sue esigenze (circa un'ora).",
+            "**Un sopralluogo tecnico** sul terreno, in Sua presenza, per verificare accessi, confini e rete elettrica.",
+            "**Una proposta scritta** con la formula scelta, i valori definitivi e la bozza di contratto, da valutare con i Suoi consulenti.",
+            "**La firma di un accordo di opzione**, con il canone di opzione riconosciuto da subito."
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "Nessuna fase è vincolante fino alla firma dell'accordo di opzione: può interrompere il percorso in qualsiasi momento, senza costi."
+        }
+      ]
+    },
+    {
+      "heading": "5. Contatti",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Può contattarci quando preferisce, anche solo per una prima chiacchierata:"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Telefono: +39 … (referente di zona: [DA CONFERMARE: nome referente])",
+            "E-mail: info@wiseglow.it",
+            "Sito: www.wiseglow.it"
+          ]
+        }
+      ]
+    }
+  ],
+  "closing": "La ringraziamo per l'attenzione e speriamo di poterLa incontrare presto per illustrarLe di persona il progetto.\nCon i migliori saluti,",
+  "signatures": [
+    { "party": "WiseGlow S.r.l.", "name": "[DA CONFERMARE: nome firmatario]", "title": "Responsabile Sviluppo – Puglia" }
+  ],
+  "attachments": [
+    "Allegato 1 – Presentazione WiseGlow",
+    "Allegato 2 – Estratto di mappa con l'area di interesse"
+  ],
+  "notes": "La presente manifestazione di interesse non è vincolante per nessuna delle parti e non costituisce offerta contrattuale. I valori indicati sono orientativi e verranno confermati a valle delle verifiche tecniche e catastali. I dati del terreno provengono da fonti pubbliche e potrebbero contenere imprecisioni."
+}

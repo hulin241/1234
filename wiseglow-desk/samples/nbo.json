@@ -1,0 +1,189 @@
+{
+  "document_id": "nbo-terreno-lecce",
+  "doc_type": "NBO",
+  "language": "it",
+  "title": "Offerta Non Vincolante",
+  "subtitle": "Acquisto di terreno agricolo – Comune di Lecce (LE), circa 12 ha",
+  "reference": "WG-NBO-2026-014",
+  "date": "2026-09-29",
+  "place": "Ancona",
+  "confidential": true,
+  "status": "Bozza",
+  "recipient": {
+    "company": "Azienda Agricola Masseria San Cataldo",
+    "name": "Sig. Antonio Rossi",
+    "role": "Titolare",
+    "address": "Strada Provinciale 366, km 4 – 73100 Lecce (LE)",
+    "email": "masseriasancataldo@pec.it"
+  },
+  "parties": [
+    {
+      "role": "Proponente",
+      "name": "WiseGlow S.r.l.",
+      "details": "Piazza Pericle Fazzini 8, 63074 San Benedetto del Tronto (AP) – P.IVA 02561900446 – in persona dell'Amministratore Unico"
+    },
+    {
+      "role": "Venditore",
+      "name": "Azienda Agricola Masseria San Cataldo di Antonio Rossi",
+      "details": "Strada Provinciale 366, km 4 – 73100 Lecce (LE) – C.F. [DA CONFERMARE]"
+    }
+  ],
+  "key_facts": [
+    ["Oggetto", "Acquisto della piena proprietà di terreno agricolo"],
+    ["Ubicazione", "Comune di Lecce (LE), località San Cataldo – Foglio 187, particelle 12, 13, 45 e 46"],
+    ["Superficie", "Circa 12,10 ha (121.000 m²) da verificare con rilievo"],
+    ["Destinazione", "Realizzazione di un impianto fotovoltaico a terra, potenza indicativa 9 MWp"],
+    ["Prezzo indicativo", "€ 55.000 per ettaro, pari a circa € 665.500 complessivi"],
+    ["Validità dell'offerta", "30 giorni dalla data del presente documento"]
+  ],
+  "intro": "Egregio Sig. Rossi,\nfacciamo seguito ai colloqui intercorsi nelle scorse settimane e al sopralluogo del 18 settembre 2026 per formalizzare, con la presente, il nostro interesse all'acquisto dei terreni di Sua proprietà siti nel Comune di Lecce, alle condizioni indicative di seguito riportate.",
+  "sections": [
+    {
+      "heading": "1. Premessa",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "WiseGlow S.r.l. (di seguito **WiseGlow** o il **Proponente**) sviluppa, realizza e gestisce impianti di produzione di energia da fonte solare in Italia. Nell'ambito del proprio piano di sviluppo nel Salento, WiseGlow ha individuato nei terreni di proprietà dell'Azienda Agricola Masseria San Cataldo (di seguito il **Venditore**) un sito idoneo alla realizzazione di un impianto fotovoltaico a terra."
+        },
+        {
+          "type": "paragraph",
+          "text": "La presente offerta non vincolante (di seguito l'**Offerta**) riassume i termini e le condizioni principali ai quali WiseGlow sarebbe disponibile a procedere con l'acquisto, fermo restando l'esito positivo delle verifiche indicate al punto 4."
+        }
+      ]
+    },
+    {
+      "heading": "2. Oggetto",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "L'Offerta ha per oggetto l'acquisto della piena proprietà dei terreni agricoli censiti al Catasto Terreni del Comune di Lecce al **Foglio 187, particelle 12, 13, 45 e 46**, per una superficie catastale complessiva di circa 12,10 ettari (di seguito il **Terreno**), liberi da persone e cose, con ogni accessorio, pertinenza, diritto e servitù attiva e passiva."
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Terreno attualmente condotto a seminativo e uliveto non irriguo, con accesso diretto dalla SP 366.",
+            "Cabina primaria Enel *Lecce Nord* a circa 2,3 km; linea MT esistente lungo la strada provinciale.",
+            "Nessun vincolo paesaggistico noto alla data odierna; verifica in corso presso il PPTR Puglia."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "3. Corrispettivo e condizioni economiche",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Il corrispettivo indicativo per l'acquisto del Terreno è fissato in **€ 55.000,00 per ettaro** di superficie effettiva, da determinarsi con rilievo topografico, per un importo complessivo stimato di **€ 665.500,00** (seicentosessantacinquemilacinquecento/00), oltre imposte e oneri di legge."
+        },
+        {
+          "type": "table",
+          "columns": ["Voce", "Importo", "Momento del pagamento"],
+          "col_widths": [40, 25, 35],
+          "rows": [
+            ["Caparra confirmatoria (10%)", "€ 66.550,00", "Alla firma del contratto preliminare"],
+            ["Acconto (20%)", "€ 133.100,00", "All'ottenimento del titolo autorizzativo"],
+            ["Saldo (70%)", "€ 465.850,00", "Al rogito notarile"],
+            ["**Totale**", "**€ 665.500,00**", ""]
+          ],
+          "caption": "Tabella 1 – Ripartizione indicativa del corrispettivo. Gli importi saranno rideterminati sulla superficie effettiva."
+        },
+        {
+          "type": "paragraph",
+          "text": "Le spese notarili, le imposte di registro, ipotecarie e catastali relative al trasferimento sono a carico del Proponente. Le spese per la regolarizzazione catastale e per la cancellazione di eventuali gravami restano a carico del Venditore."
+        }
+      ]
+    },
+    {
+      "heading": "4. Condizioni sospensive e due diligence",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "L'eventuale sottoscrizione del contratto preliminare e del contratto definitivo è subordinata all'esito positivo, a insindacabile giudizio di WiseGlow, delle seguenti verifiche:"
+        },
+        {
+          "type": "numbered",
+          "items": [
+            "verifica della titolarità, della libertà da ipoteche, pignoramenti, trascrizioni pregiudizievoli e da contratti di affitto agrario;",
+            "verifica urbanistica, paesaggistica e ambientale del Terreno, incluse le aree idonee ai sensi del D.Lgs. 199/2021 e del PPTR della Regione Puglia;",
+            "ottenimento di un preventivo di connessione (STMG) da parte di e-distribuzione con costi e tempi compatibili con il progetto;",
+            "assenza di vincoli archeologici, idrogeologici o di usi civici;",
+            "esito positivo dei rilievi topografici e geologici preliminari."
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "info",
+          "text": "**Durata della due diligence:** 90 giorni dall'accettazione della presente Offerta, prorogabili di ulteriori 60 giorni su richiesta motivata del Proponente. Il Venditore si impegna a fornire la documentazione richiesta entro 15 giorni dalla richiesta."
+        }
+      ]
+    },
+    {
+      "heading": "5. Tempistiche",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "table",
+          "columns": ["Fase", "Termine indicativo", "Note"],
+          "col_widths": [38, 27, 35],
+          "rows": [
+            ["Accettazione dell'Offerta", "Entro 30 giorni", "Con sottoscrizione per accettazione"],
+            ["Due diligence", "90 giorni", "Prorogabile di 60 giorni"],
+            ["Contratto preliminare", "Entro 30 giorni dal termine della due diligence", "Con versamento della caparra"],
+            ["Titolo autorizzativo", "12–18 mesi", "Condizione sospensiva del definitivo"],
+            ["Rogito notarile", "Entro 60 giorni dal titolo", "Presso notaio scelto dal Proponente"]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "6. Esclusiva e riservatezza",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Con l'accettazione della presente Offerta il Venditore si impegna, per un periodo di **6 mesi**, a non avviare, proseguire o concludere trattative con soggetti terzi aventi ad oggetto il Terreno o diritti sullo stesso, e a non concedere opzioni, diritti di superficie o contratti di affitto incompatibili con il progetto."
+        },
+        {
+          "type": "paragraph",
+          "text": "Le Parti si impegnano a mantenere riservati il contenuto della presente Offerta, le informazioni scambiate e l'esistenza stessa delle trattative, salvo quanto necessario nei confronti dei propri consulenti, enti e istituti finanziatori, comunque tenuti ad analogo obbligo di riservatezza."
+        }
+      ]
+    },
+    {
+      "heading": "7. Natura non vincolante",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "callout",
+          "style": "warning",
+          "text": "La presente Offerta ha natura **meramente indicativa e non vincolante** e non costituisce proposta contrattuale ai sensi degli artt. 1326 e seguenti del codice civile. Nessun obbligo di concludere l'operazione sorgerà in capo alle Parti fino alla sottoscrizione di un contratto preliminare in forma scritta, fatti salvi gli impegni di esclusiva e riservatezza di cui al punto 6."
+        }
+      ]
+    },
+    {
+      "heading": "8. Legge applicabile",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "La presente Offerta è regolata dalla legge italiana. Per qualsiasi controversia relativa alla sua interpretazione o esecuzione sarà competente in via esclusiva il Foro di Ancona."
+        }
+      ]
+    }
+  ],
+  "closing": "Restiamo a disposizione per ogni chiarimento e, nell'auspicio di poter avviare al più presto una proficua collaborazione, La invitiamo a restituirci copia della presente sottoscritta per accettazione.\nCordiali saluti,",
+  "signatures": [
+    { "party": "WiseGlow S.r.l.", "name": "[DA CONFERMARE: nome firmatario]", "title": "Amministratore Unico" },
+    { "party": "Per accettazione – Il Venditore", "name": "Antonio Rossi", "title": "Titolare, Azienda Agricola Masseria San Cataldo" }
+  ],
+  "attachments": [
+    "Allegato A – Planimetria catastale con perimetrazione del Terreno",
+    "Allegato B – Visura catastale delle particelle 12, 13, 45 e 46",
+    "Allegato C – Presentazione WiseGlow e referenze"
+  ],
+  "notes": "Il presente documento è una bozza di lavoro predisposta da WiseGlow S.r.l. a uso interno e della controparte. Gli importi e i termini sono indicativi e soggetti a verifica; il documento non costituisce consulenza legale né fiscale. I dati anagrafici e catastali contrassegnati con [DA CONFERMARE] devono essere verificati prima dell'invio."
+}
