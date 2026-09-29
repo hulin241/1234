@@ -1,0 +1,40 @@
+# Identità visiva WiseGlow: modifica i valori, non le chiavi.
+# Il renderer (wiseglow_desk/docgen/docx_renderer.py) legge questo file a ogni documento.
+# Valori iniziali ricavati da wiseglow.com / wiseglow.it e dai whitepaper ufficiali WiseGlow (2026):
+# verificali e correggili (basta modificare questo file o chiederlo al bot in chat).
+company:
+  name: "WiseGlow S.r.l."
+  tagline: "AI + Energy"
+  address: "Piazza Pericle Fazzini 8, 63074 San Benedetto del Tronto (AP) · Sede operativa: Via I° Maggio 20, 60131 Ancona"
+  vat: "P.IVA e C.F. 02561900446 · REA AP-303518"
+  email: "contatti@wiseglow.com"
+  phone: ""
+  website: "www.wiseglow.com"
+colors:
+  primary: "#243F58"       # navy WiseGlow (whitepaper): titoli, riga dell'intestazione, riempimento intestazione tabelle
+  secondary: "#FF670D"     # arancio WiseGlow: linea accento sotto il titolo, bordo dei riquadri, etichette
+  text: "#1A1E24"
+  muted: "#818A8E"
+  table_header_text: "#FFFFFF"
+  table_alt_row: "#F0F2F4"
+  callout_bg: "#E1F0F6"    # tinta ciano chiaro dei whitepaper
+fonts:
+  heading: "Sora"          # font titoli del sito WiseGlow (brew install --cask font-sora)
+  body: "Inter"            # font testo del sito e dei whitepaper (brew install --cask font-inter)
+  fallback: "Arial"        # usato se il font indicato non è installato (il DOCX indica solo il nome)
+  body_cjk: "PingFang SC"  # font per il cinese (w:eastAsia); su Linux "Noto Sans CJK SC"
+logo:
+  file: "logo.png"         # relativo a brand.yaml: wordmark ufficiale "WiseGlow · AI + ENERGY" (PNG trasparente 1200×222)
+  width_cm: 4.6
+  max_height_cm: 1.6       # altezza massima nell'intestazione: un logo quadrato/verticale viene ridotto (proporzioni mantenute)
+page:
+  size: "A4"
+  margins_cm: { top: 2.3, bottom: 2.1, left: 2.3, right: 2.3 }
+footer:
+  text: "WiseGlow S.r.l. · Piazza Pericle Fazzini 8, 63074 San Benedetto del Tronto (AP) · P.IVA 02561900446 · contatti@wiseglow.com · www.wiseglow.com"
+  page_numbers: true       # "Pagina X di Y" (campi PAGE / NUMPAGES)
+  confidential_label: "Riservato"
+labels:                    # etichette fisse per lingua usate dal renderer
+  it: { date: "Data", place: "Luogo", reference: "Rif.", recipient: "Spett.le", signatures: "Firme", attachments: "Allegati", page: "Pagina", of: "di", draft: "Bozza" }
+  en: { date: "Date", place: "Place", reference: "Ref.", recipient: "To", signatures: "Signatures", attachments: "Attachments", page: "Page", of: "of", draft: "Draft" }
+  zh: { date: "日期", place: "地点", reference: "编号", recipient: "致", signatures: "签署", attachments: "附件", page: "第", of: "页，共", draft: "草稿" }

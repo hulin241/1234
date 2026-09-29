@@ -1,0 +1,11 @@
+# runtime data (documenti, allegati, sessioni, log)
+workspace/
+
+# credenziali
+.env
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
